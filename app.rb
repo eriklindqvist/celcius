@@ -14,6 +14,8 @@ class Celcius < Sinatra::Base
   # curl http://localhost:4004/
   get '/' do
     # TODO: Aggregate all values for all sensors in JSON-format
+    #metrics = Metric.where(:date.gte => "ISODate('#{1.day.ago.to_date}')", :date.lte => "ISODate('#{(Time.now+1.day).to_date}')").group_by(&:sensor...
+    #values.map {|h,mins| mins.map {|min,val| [Time.parse("#{m.date} #{h}:#{min}").to_i*1000,val] }}.flatten(1)
   end
 
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature
