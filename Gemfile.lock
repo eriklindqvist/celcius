@@ -57,6 +57,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  json
   mongoid
   shotgun
   sinatra
