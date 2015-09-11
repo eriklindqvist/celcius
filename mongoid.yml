@@ -1,0 +1,6 @@
+development:
+  sessions:
+    default:
+      database: temperatur
+      hosts:
+        - localhost:27017
