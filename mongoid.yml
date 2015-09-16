@@ -1,6 +1,9 @@
-development:
+development: &development
   sessions:
     default:
       database: temperatur
       hosts:
         - localhost:27017
+
+migration:
+  <<: *development
