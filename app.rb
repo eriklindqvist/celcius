@@ -47,9 +47,10 @@ class Celcius < Sinatra::Base
   # curl -X POST -d "name=Test" http://localhost:4004/sensor
   post '/sensor' do
     name = param :name
+    uid = param :uid
 
     begin
-      Sensor.find_or_create_by!(name: name)
+      Sensor.find_or_create_by!(name: name, uid: uid)
     rescue => e
       halt 500, e.message
     end
