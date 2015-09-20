@@ -1,5 +1,5 @@
 development: &development
-  sessions:
+  clients:
     default:
       database: temperatur
       hosts:
