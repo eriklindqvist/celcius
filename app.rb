@@ -13,19 +13,15 @@ class Celcius < Sinatra::Base
 
   # curl http://localhost:4004/
   get '/' do
-    # content_type :json
-    # today = Date.today
-    #
-    # Metric.where(:date.gte => "ISODate('#{Date.today - 1}')").map{ |m| {sensor: m.sensor.name, values: m.values_arr.compact }}
-    #
-    # Metric.where(:date.gte => "ISODate('#{Date.today - 1}')").map{|m| m.values_arr.map{|v| {s: m.sensor.name, t: v[0], v: v[1] }}}.flatten.select{|e| e[:v] && e[:t] > 1.day.ago }.group_by{|v| v[:s] }
-    #
-    # Metric.where(:date.gte => "ISODate('#{Date.today - 1}')").map{ |m| {m.sensor.name => m.values_arr.compact }}
-    #
-    #   {sensor: metric.sensor.name, value: metric.values.select{|hour| (metric.date < today && hour.to_i >= Time.now.hour) || metric.date == today }
-    #                            .map {|hour,minutes| minutes.select{ |minute, value| hour.to_i > Time.now.hour || (hour.to_i == Time.now.hour && minute.to_i >= Time.now.min ) }
-    #       map {|minute, value| [metric.date.to_time + hour.to_i.hours + minute.to_i.minutes, value] }}.flatten(1).to_h.compact}}.group_by{|h| h[:sensor] }
-    #minutes.select{|minute, value| ok = (hour.to_i > Time.now.hour || (hour.to_i == Time.now.hour && minute.to_i >= Time.now.min)); puts "#{hour}:#{minute} - #{ok}"; ok}
+    content_type :json
+
+    Metric.where(:date.gte => "ISODate('#{Date.today - 1}')")
+        .map{ |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}
+        .group_by{|h| h[:sensor] }
+        .map{|sensor,vals| [sensor, vals.map{|v| v[:values]
+                                                     .select{|time,value| time > (Time.now - 1.day)}
+                                                     .map{|time, value| [time.to_i*1000, value]}}
+                                        .map(&:to_a).flatten(1)]}.to_h.to_json
   end
 
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature
@@ -33,10 +29,11 @@ class Celcius < Sinatra::Base
     begin
       sensor = Sensor.find param(:sensor)
       value = Float(param(:value))
-      time = Time.at(param(:time).to_i)
     rescue => e
       halt 400, e.message
     end
+
+    time = Time.at(param(:time).to_i) rescue Time.now
 
     logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
     Value.create(sensor, time, value)

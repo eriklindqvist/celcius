@@ -32,13 +32,13 @@ sensors = Migrate::Sensor.all.map {|s| [s.id, Sensor.find_or_create_by(name: s.d
 metrics = sensors.keys.map{|k| [k,{}] }.to_h
 i = 0
 
-Migrate::Temperature.where("time > '#{2.days.ago.to_date.to_s}'").find_each do |t|
+Migrate::Temperature.where("time > '#{10.days.ago.to_date.to_s}'").find_each do |t|
   sensor = metrics[t.sensor]
   unless sensor
     puts "sensor #{t.sensor} not found!"
   else
     metric = sensor[t.time.to_date.to_s] ||= Metric.find_or_create_by(date: t.time.to_date, sensor: sensors[t.sensor])
-    metric.values[t.time.hour.to_s][t.time.min.to_s] = t.temp
+    metric.set_value(t.time, t.temp)
     i += 1
     if i % 100 == 0
       print "\rread #{i} temperatures. currently at date #{t.time.to_date}"
