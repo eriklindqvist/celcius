@@ -1,10 +1,10 @@
 #https://blog.codeship.com/build-minimal-docker-container-ruby-apps/
 
-FROM alpine:3.2
+FROM alpine:edge
 MAINTAINER Erik Lindqvist <erikjo82@gmail.com>
 
-ENV BUILD_PACKAGES bash curl-dev ruby-dev build-base
-ENV RUBY_PACKAGES ruby ruby-io-console ruby-bundler
+ENV BUILD_PACKAGES bash curl-dev ruby-dev build-base 
+ENV RUBY_PACKAGES ruby ruby-io-console ruby-bundler ruby-dev ruby-raindrops
 
 # Update and install all of the required packages.
 # At the end, remove the apk cache
@@ -19,6 +19,6 @@ WORKDIR /usr/app
 
 COPY Gemfile /usr/app/
 COPY Gemfile.lock /usr/app/
-RUN bundle install
+RUN bundle update
 
 COPY . /usr/app
