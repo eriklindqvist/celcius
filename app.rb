@@ -10,9 +10,12 @@ Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
 Mongoid.load!("mongoid.yml")
 
 class Celcius < Sinatra::Base
-
-  # curl http://localhost:4004/
   get '/' do
+    send_file File.expand_path('index.html', settings.public_folder)
+  end
+
+  # curl http://localhost:4004/data
+  get '/data' do
     content_type :json
 
     Metric.where(:date.gte => "ISODate('#{Date.today - 1}')")
@@ -27,7 +30,7 @@ class Celcius < Sinatra::Base
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature
   post '/temperature' do
     begin
-      sensor = Sensor.find param(:sensor)
+      sensor = Sensor.find_by uid: param(:sensor)
       value = Float(param(:value))
     rescue => e
       halt 400, e.message
