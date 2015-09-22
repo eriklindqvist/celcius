@@ -5,10 +5,10 @@ gem 'sinatra'
 gem 'mongoid'
 gem 'json'
 
-# group :migration do
-#  gem 'activerecord'
-#  gem 'mysql'
-# end
+#group :migration do
+# gem 'activerecord'
+# gem 'mysql'
+#end
 
 group :development do
   gem 'thin'

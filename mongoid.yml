@@ -6,4 +6,8 @@ development: &development
         - localhost:27017
 
 migration:
-  <<: *development
+  clients:
+    default:
+      database: temperatur
+      hosts:
+        - proto:27017
