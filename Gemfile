@@ -4,6 +4,7 @@ gem 'shotgun'
 gem 'sinatra'
 gem 'mongoid'
 gem 'json'
+gem 'erubis'
 
 #group :migration do
 # gem 'activerecord'

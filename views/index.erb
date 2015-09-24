@@ -4,14 +4,15 @@
     <title>Temperaturer</title>
     <meta charset="UTF-8" />
     <script src="http://zeptojs.com/zepto.min.js"></script>
-    <script src="public/zepto-adapter.src.js"></script>
+    <script src="zepto-adapter.src.js"></script>
     <script src="http://code.highcharts.com/highcharts.js"></script>
-    <script src="/data"></script>
     <script type="text/javascript">
+      <%= @data %>
+
       var simplify = function(arr) {
-	if (arr.length == 0) {
-		return arr;
-	}
+      	if (arr.length == 0) {
+      		return arr;
+      	}
 
         var previous = 0;
         var threshold = 0.1;
@@ -31,7 +32,6 @@
         arr3.push([new Date().getTime(), arr[arr.length-1][1]]);
         return arr3;
       }
-
 
       var maximums = function(arr) {
         arr2 = $.map(arr, function(item, index) {
