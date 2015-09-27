@@ -5,6 +5,7 @@ gem 'sinatra'
 gem 'mongoid'
 gem 'json'
 gem 'erubis'
+gem 'bigdecimal'
 
 #group :migration do
 # gem 'activerecord'

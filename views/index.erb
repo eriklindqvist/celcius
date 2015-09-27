@@ -3,68 +3,20 @@
   <head>
     <title>Temperaturer</title>
     <meta charset="UTF-8" />
-    <script src="http://zeptojs.com/zepto.min.js"></script>
-    <script src="zepto-adapter.src.js"></script>
-    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <!--script src="http://zeptojs.com/zepto.min.js"></script-->
+    <script type="text/javascript" src="zepto.min.js"></script>
+    <script type="text/javascript" src="zepto-adapter.src.js"></script>
+    <!--script src="http://code.highcharts.com/highcharts.js"></script-->
+    <script type="text/javascript" src="highcharts.js"></script>
     <script type="text/javascript">
-      <%= @data %>
-
-      var simplify = function(arr) {
-      	if (arr.length == 0) {
-      		return arr;
-      	}
-
-        var previous = 0;
-        var threshold = 0.1;
-
-        arr2 = $.map(arr, function(item, index) {
-          if ( Math.abs(item[1] - previous) > threshold ) {
-            previous = item[1];
-            return [item];
-          }
-        });
-
-        arr3 = $.map(arr2, function(item, index) {
-          if (index % 4 == 0)
-            return [item];
-        });
-
-        arr3.push([new Date().getTime(), arr[arr.length-1][1]]);
-        return arr3;
-      }
-
-      var maximums = function(arr) {
-        arr2 = $.map(arr, function(item, index) {
-          if (index > 0 && index < arr.length-1) {
-            value1 = arr[index-1][1];
-            value2 = item[1];
-            value3 = arr[index+1][1];
-            if (value2 >= value1 && value2 >= value3) {
-              //console.log(value1, value2, value3);
-              return [item];
-            }
-          }
-        });
-
-        var previous = 0;
-
-        return $.map(arr2.reverse(), function(item, index) {
-          if (item[1] > previous) {
-            previous = item[1];
-            return [item];
-          }
-        }).reverse();
-      }
-
-      var currtemp = function(arr) {
-        temp = arr[arr.length-1][1];
-
-        //console.log("temp: " + temp);
-        return Math.round(temp*100)/100 + ' °C';
-      }
+      data = <%= @data %>
 
       $(document).ready(function () {
-          max_d3 = maximums(simplify(d3));
+          Highcharts.setOptions({
+              global: {
+                  timezoneOffset: -2 * 60
+              }
+          });
 
           new Highcharts.Chart({
             chart: {
@@ -80,10 +32,6 @@
             },
             xAxis: {
                 type: 'datetime',
-                /*dateTimeLabelFormats: { // don't display the dummy year
-                    month: '%e. %b',
-                    year: '%b'
-                },*/
                 tickPixelInterval: 150,
                 title: {
                     text: 'Klockslag'
@@ -92,11 +40,10 @@
             yAxis: {
                 title: {
                     text: 'Temperatur'
-                }/*,
-                min: 0*/
+                }
             },
             tooltip: {
-                headerFormat: '<b>{series.name}</b><br>',
+                headerFormat: '<b>{series.name}</b><br>{series.data[0]} grader',
                 pointFormat: '{point.x:%e. %b}: {point.y:.2f}'
             },
             plotOptions: {
@@ -112,16 +59,7 @@
               verticalAlign: 'bottom',
               borderWidth: 1
             },
-            series: [
-              { name: 'Pannan: ' + currtemp(d1), data: simplify(d1) },
-              { name: 'Botten av tanken: ' + currtemp(d2), data: simplify(d2) },
-              { name: 'Varmvatten: ' + currtemp(d3), data: simplify(d3) },
-              { name: 'Pannrummet: ' + currtemp(d4), data: simplify(d4) },
-              { name: 'Utomhus: ' + currtemp(d5), data: simplify(d5) },
-              { name: 'Inomhus: ' + currtemp(d7), data: simplify(d7) },
-              { name: 'Källaren: ' + currtemp(d8), data: simplify(d8) },
-              { name: 'Toppen av tanken: ' + currtemp(max_d3), data: max_d3 }
-            ]
+            series: data
           })
         });
     </script>

@@ -10,6 +10,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    bigdecimal (1.2.4)
     bson (3.2.4)
     builder (3.2.2)
     daemons (1.2.3)
@@ -54,6 +55,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bigdecimal
   erubis
   json
   mongoid
