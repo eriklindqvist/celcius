@@ -11,3 +11,10 @@ migration:
       database: temperatur
       hosts:
         - proto:27017
+
+production:
+  clients:
+    default:
+      database: temperatur
+      hosts:
+        - proto:27017

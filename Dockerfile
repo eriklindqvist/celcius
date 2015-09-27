@@ -19,3 +19,5 @@ COPY Gemfile.lock /usr/app/
 RUN bundle update
 
 COPY . /usr/app
+
+EXPOSE 4004
