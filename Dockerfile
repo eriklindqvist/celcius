@@ -16,7 +16,7 @@ WORKDIR /usr/app
 
 COPY Gemfile /usr/app/
 COPY Gemfile.lock /usr/app/
-RUN bundle update
+RUN bundle install --without=migration development --no-color
 
 COPY . /usr/app
 

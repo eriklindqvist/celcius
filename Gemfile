@@ -1,18 +1,18 @@
 source 'https://rubygems.org'
 
-gem 'shotgun'
 gem 'sinatra'
 gem 'mongoid'
 gem 'json'
 gem 'erubis'
 gem 'bigdecimal'
 
-#group :migration do
-# gem 'activerecord'
-# gem 'mysql'
-#end
+group :migration do
+  gem 'activerecord'
+  gem 'mysql'
+end
 
 group :development do
+  gem 'shotgun'
   gem 'thin'
 end
 
