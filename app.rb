@@ -68,6 +68,15 @@ class Celcius < Sinatra::Base
   end
 
   def get_todays_metrics
-    Metric.where(:date.gte => "ISODate('#{Date.today - 1}')").map{ |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}.group_by{|h| h[:sensor] }.map{|sensor,vals| {name:  sensor + ": " + vals.last[:values].max[1].to_s, data: vals.map{|v| v[:values].select{|time,value| time > (Time.now - 1.day)}.map{|time, value| [time.to_i*1000, value]}}.map(&:to_a).flatten(1)}}
+    Metric.where(:date.gte => "ISODate('#{Date.today - 1}')")
+      .order_by(sensor: :desc)
+      .map { |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}
+      .group_by { |h| h[:sensor] }
+      .map { |sensor, vals| {
+        name: sensor,
+        data: vals.map { |v| v[:values].select {|time,value| time > (Time.now - 1.day) }
+                                       .map { |time, value| [time.to_i*1000, value] }}
+                   .map(&:to_a).flatten(1)}}
+      .each {|metric| metric[:data].last[0] = Time.now.utc.to_i*1000 }
   end
 end
