@@ -1,3 +1,4 @@
 #!/bin/bash
-#bundle --no-color update --group=production &&
+git pull
+bundle install --without=migration development --no-color
 RACK_ENV=production bundle exec unicorn -c unicorn.rb
