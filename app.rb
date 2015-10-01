@@ -8,6 +8,7 @@ require 'json'
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
 
 Mongoid.load!("mongoid.yml")
+Mongo::Logger.logger.level = Logger::INFO
 
 class Celcius < Sinatra::Base
   enable :logging

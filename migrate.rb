@@ -1,4 +1,4 @@
-ENV['RACK_ENV'] ||= 'migration'
+environment = ENV['RACK_ENV'] || 'migration'
 
 require 'rubygems'
 require 'bundler/setup'
@@ -9,9 +9,11 @@ require 'active_record'
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
 
-Mongoid.load!("mongoid.yml")
+Mongoid.load!("mongoid.yml", environment)
+Mongo::Logger.logger.level = Logger::INFO
 
 ActiveRecord::Base.establish_connection(adapter: 'mysql', host: '10.0.0.60', database: 'temperatures', username: 'migrate', password: 'mongo')
+
 
 module Migrate
   class Sensor < ActiveRecord::Base
@@ -28,11 +30,11 @@ module Migrate
   end
 end
 
-sensors = Migrate::Sensor.all.map {|s| [s.id, Sensor.find_or_create_by(name: s.description, uid: s.uid)] }.to_h
+sensors = Migrate::Sensor.all.map {|s| [s.id, Sensor.find_or_create_by(uid: s.uid)] }.to_h
 metrics = sensors.keys.map{|k| [k,{}] }.to_h
 i = 0
 
-Migrate::Temperature.where("time > '#{2.days.ago.to_date.to_s}'").find_each do |t|
+Migrate::Temperature.find_each do |t|
   sensor = metrics[t.sensor]
   unless sensor
     puts "sensor #{t.sensor} not found!"
