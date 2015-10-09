@@ -4,6 +4,7 @@ require 'bundler/setup'
 require 'sinatra'
 require 'mongoid'
 require 'json'
+require 'tilt/erubis'
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
 
@@ -69,15 +70,16 @@ class Celcius < Sinatra::Base
   end
 
   def get_todays_metrics
-    Metric.where(:date.gte => "ISODate('#{Date.today - 1}')")
+    Metric.where(:date.gte => 1.days.ago)
       .order_by(sensor: :desc)
       .map { |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}
       .group_by { |h| h[:sensor] }
       .map { |sensor, vals| {
         name: sensor,
-        data: vals.map { |v| v[:values].select {|time,value| time > (Time.now - 1.day) }
+        data: vals.map { |v| v[:values].select {|time| time > (Time.now - 1.day) }
                                        .map { |time, value| [time.to_i*1000, value] }}
+                                .sort_by { |values| values[0] }
                    .map(&:to_a).flatten(1)}}
-      .each {|metric| metric[:data].last[0] = Time.now.utc.to_i*1000 }
+      .each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
   end
 end

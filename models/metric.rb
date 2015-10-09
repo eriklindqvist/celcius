@@ -2,7 +2,7 @@ class Metric
   include Mongoid::Document
 
   field :date, type: Date
-  field :values, type: Array, default: {}
+  field :values, type: Hash, default: {}
 
   belongs_to :sensor
 

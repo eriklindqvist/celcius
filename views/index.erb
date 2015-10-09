@@ -43,8 +43,8 @@
                 }
             },
             tooltip: {
-                headerFormat: '<b>{series.name}</b><br>',
-                pointFormat: '{point.x:%e. %b}: {point.y:.2f}'
+                headerFormat: '<b>{series.name}</b>: ',
+                pointFormat: '{point.y:.2f}'
             },
             plotOptions: {
               series: {
@@ -57,7 +57,8 @@
               layout: 'horizontal',
               align: 'center',
               verticalAlign: 'bottom',
-              borderWidth: 1
+              borderWidth: 1,
+              labelFormatter: function () { return this.name + ': ' + this.yData[this.yData.length - 1].toFixed(2); }
             },
             series: data
           })
