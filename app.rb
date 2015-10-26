@@ -77,7 +77,7 @@ class Celcius < Sinatra::Base
       .map { |sensor, vals| {
         name: sensor,
         data: vals.map { |v| v[:values].select {|time| time > (Time.now - 1.day) }
-                                       .map { |time, value| [time.to_i*1000, value] }}
+                                       .map { |time, value| [time.to_i*1000, value] }}.to_a
                                 .sort_by { |values| values[0] }
                    .map(&:to_a).flatten(1)}}
       .each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
