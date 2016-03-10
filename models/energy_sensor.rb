@@ -1,0 +1,2 @@
+class EnergySensor < Sensor
+end

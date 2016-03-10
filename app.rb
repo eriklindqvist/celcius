@@ -39,6 +39,20 @@ class Celcius < Sinatra::Base
     Value.create(sensor, time, value)
   end
 
+# curl -X POST -d "sensor=1&value=12345" http://localhost:4004/pulses
+  post '/pulses' do
+    begin
+      sensor = EnergySensor.find_by uid: param(:sensor)
+      pulses = Integer(param(:value))
+    rescue => e
+      halt 400, e.message
+    end
+
+    time = Time.at params[:time]
+    logger.info "energy sensor: #{sensor}, pulses: #{value}, time: #{time}"
+    WattageValue.create(sensor, time, pulses)
+  end
+
   # curl http://localhost:4004/sensors
   get '/sensors' do
     content_type :json
@@ -71,6 +85,7 @@ class Celcius < Sinatra::Base
 
   def get_todays_metrics
     Metric.where(:date.gte => 1.days.ago)
+      .where(_type: "Metric")
       .order_by(sensor: :desc)
       .map { |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}
       .group_by { |h| h[:sensor] }
