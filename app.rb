@@ -6,7 +6,8 @@ require 'mongoid'
 require 'json'
 require 'tilt/erubis'
 
-Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
+#Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
+require_relative 'helpers/init'
 
 Mongoid.load!("mongoid.yml")
 Mongo::Logger.logger.level = Logger::INFO
@@ -48,8 +49,8 @@ class Celcius < Sinatra::Base
       halt 400, e.message
     end
 
-    time = Time.at params[:time]
-    logger.info "energy sensor: #{sensor}, pulses: #{value}, time: #{time}"
+    time = Time.now
+    logger.info "energy sensor: #{sensor}, pulses: #{pulses}, time: #{time}"
     WattageValue.create(sensor, time, pulses)
   end
 
@@ -70,8 +71,10 @@ class Celcius < Sinatra::Base
     name = param :name
     uid = param :uid
 
+    type = params[:type] == 'energy' ? EnergySensor : Sensor
+
     begin
-      Sensor.find_or_create_by!(name: name, uid: uid)
+      type.find_or_create_by!(name: name, uid: uid)
     rescue => e
       halt 500, e.message
     end

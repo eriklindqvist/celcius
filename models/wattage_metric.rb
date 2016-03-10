@@ -1,5 +1,5 @@
 class WattageMetric < Metric
   include Mongoid::Timestamps
 
-  field :pulses, type: Integer
+  field :pulses, type: Bignum
 end
