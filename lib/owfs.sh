@@ -1,30 +1,22 @@
 #!/bin/bash
 
-url=http://localhost:9393
+url=http://proto:4004
 
-#owfs='/mnt/owfs'
-#pwd=`pwd`
+owfs='/mnt/owfs'
+pwd=`pwd`
 
-#cd $owfs
+cd $owfs
 
-while true
+for sensor in `ls -1d 10.*`
 do
-  for sensor in `ssh root@dockstar2 'cd /mnt/owfs && ls -1d 10.*'`
-  do
-    temperature=`ssh root@dockstar2 cat /mnt/owfs/$sensor/temperature | sed 's/^ *//g'`
-    curl -X POST -d "sensor=$sensor&value=$temperature" $url/temperature
-  done
-
-  i=0
-  while [ $i -lt 4 ]
-  do
-    for sensor in `ssh root@dockstar2 'cd /mnt/owfs && ls -1d 1D.*'`
-    do
-      pulses=`ssh root@dockstar2 cat /mnt/owfs/$sensor/counters.B`
-      curl -X POST -d "sensor=$sensor&value=$pulses" $url/pulses
-    done
-    i=$(( $i + 1 ))
-    sleep 15
-  done
+  temperature=`cat $sensor/temperature | sed 's/^ *//g'`
+  curl -X POST -d "sensor=$sensor&value=$temperature" $url/temperature
 done
-#cd $pwd
+
+for sensor in `ls -1d 1D.*`
+do
+  pulses=`cat uncached/$sensor/counters.B | sed 's/^ *//g'`
+  curl -X POST -d "sensor=$sensor&value=$pulses" $url/pulses
+done
+
+cd $pwd
