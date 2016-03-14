@@ -88,16 +88,18 @@ class Celcius < Sinatra::Base
 
   def get_todays_metrics
     Metric.where(:date.gte => 1.days.ago)
-      .where(_type: "Metric")
       .order_by(sensor: :desc)
-      .map { |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}
-      .group_by { |h| h[:sensor] }
-      .map { |sensor, vals| {
-        name: sensor,
-        data: vals.map { |v| v[:values].select {|time| time > (Time.now - 1.day) }
-                                       .map { |time, value| [time.to_i*1000, value] }}.to_a
-                                .sort_by { |values| values[0]||[] }
-                   .map(&:to_a).flatten(1)}}
-      .each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
+      .group_by(&:_type)
+      .map {|type, metrics|
+        metrics.map { |m| {sensor: m.sensor.name, values: m.values_arr.compact.to_h }}
+        .group_by { |h| h[:sensor] }
+        .map { |sensor, vals| {
+          name: sensor,
+          data: vals.map { |v| v[:values].select {|time| time > (Time.now - 1.day) }
+                                         .map { |time, value| [time.to_i*1000, value] }}.to_a
+                                  .sort_by { |values| values[0]||[] }
+                     .map(&:to_a).flatten(1)}}
+        .each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
+      }
   end
 end

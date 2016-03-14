@@ -14,6 +14,7 @@ end
 group :development do
   gem 'shotgun'
   gem 'thin'
+  gem 'awesome_print'
 end
 
 group :production do
