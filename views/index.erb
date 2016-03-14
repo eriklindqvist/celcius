@@ -6,8 +6,8 @@
     <!--script src="http://zeptojs.com/zepto.min.js"></script-->
     <script type="text/javascript" src="zepto.min.js"></script>
     <script type="text/javascript" src="zepto-adapter.src.js"></script>
-    <script src="http://code.highcharts.com/highcharts.js"></script>
-    <!--script type="text/javascript" src="highcharts.js"></script-->
+    <!--script src="http://code.highcharts.com/highcharts.js"></script-->
+    <script type="text/javascript" src="highcharts.js"></script>
     <script type="text/javascript">
       data = <%= @data %>
 
@@ -21,7 +21,6 @@
 
           new Highcharts.Chart({
             chart: {
-              animation: false,
               renderTo: 'container',
               chart: 'spline'
             },
@@ -54,12 +53,13 @@
                 },
                 opposite: true
             }],
-            /*tooltip: {
+            tooltip: {
                 headerFormat: '<b>{series.name}</b>: ',
                 pointFormat: '{point.y:.2f}'
-            },*/
+            },
             plotOptions: {
               series: {
+                animation: false,
                 marker: {
                   enabled: false
                 }
@@ -70,20 +70,9 @@
               align: 'center',
               verticalAlign: 'bottom',
               borderWidth: 1,
-              //labelFormatter: function () { return this.name + ': ' + this.yData[this.yData.length - 1].toFixed(2); }
+              labelFormatter: function () { return this.name + ': ' + this.yData[this.yData.length - 1].toFixed(2); }
             },
-            series: data/*[{
-              name: 'Temperaturer',
-              type: 'spline',
-              yAxis: 0,
-              data: data[0]
-
-            },{
-              name: 'Energiförbrukning',
-              type: 'spline',
-              yAxis: 1,
-              data: data[1][0].data
-            }]*/
+            series: data
           })
         });
     </script>
