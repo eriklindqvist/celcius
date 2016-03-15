@@ -9,6 +9,9 @@ RUN apk update && \
     apk upgrade && \
     apk add bash curl-dev ruby-dev build-base git && \
     apk add ruby ruby-io-console ruby-bundler ruby-dev ruby-raindrops && \
+    apk add tzdata && \
+    cp /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
+    echo "Europe/Stockholm" > /etc/timezone && \
     rm -rf /var/cache/apk/*
 
 RUN mkdir /usr/app
