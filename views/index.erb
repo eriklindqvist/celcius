@@ -14,15 +14,34 @@
       $(document).ready(function () {
           Highcharts.setOptions({
               global: {
-                  timezoneOffset: -1 * 60,
-                  useUTC: true
+                  //timezoneOffset: -1 * 60,
+                  useUTC: false
               }
           });
 
           new Highcharts.Chart({
             chart: {
               renderTo: 'container',
-              chart: 'spline'
+              type: 'spline',
+              events: {
+                load: function () {
+                  $.each(this.series, function(i, serie) {
+                    setInterval(function () {
+                      now = (new Date()).getTime();
+                      $.ajax({
+                        url: '/sensor/'+serie.name,
+                        success: function(data) {
+                          if (data.current != null) {
+                            serie.addPoint([now, data.current], true, true);
+                          } else {
+                            serie.addPoint([now, serie.yData[serie.yData.length - 1]], true, true);
+                          }
+                        }
+                      })
+                    }, 30000);
+                  });
+                }
+              }
             },
             title: {
                 text: 'Temperaturer'

@@ -57,13 +57,13 @@ class Celcius < Sinatra::Base
   # curl http://localhost:4004/sensors
   get '/sensors' do
     content_type :json
-    Sensor.all.as_json.to_s
+    Sensor.all.map(&:to_json)
   end
 
   # curl http://localhost:4004/sensors/:name
   get '/sensor/:name' do
     content_type :json
-    Sensor.find_by(name: param(:name)).as_json.to_s rescue halt 404, 'Sensor not found'
+    Sensor.find_by(name: param(:name)).to_json rescue halt 404, 'Sensor not found'
   end
 
   # curl -X POST -d "name=Test&uid=123" http://localhost:4004/sensor
