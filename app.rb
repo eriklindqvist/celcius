@@ -21,6 +21,27 @@ class Celcius < Sinatra::Base
     erb :index
   end
 
+  # curl http://localhost:4004/el
+  get '/energy' do
+    erb :energy
+  end
+
+  # curl http://localhost:4004/energy/daily/2016-03-31
+  get '/energy/daily/?:date?' do
+    content_type :json
+    date = params[:date] ? Date.parse(params[:date]) : Date.today
+    get_energies(date-1, date+1).first.to_json
+  end
+
+  # curl http://localhost:4004/energy/monthly
+  get '/energy/monthly/?:date?' do
+    content_type :json
+    date = params[:date] ? Date.parse(params[:date]) : Date.today
+    first = Date.new(date.year, date.month, 1) - 1
+    last = Date.new(date.year, date.month+1, 1)
+    get_energies(first, last).to_json
+  end
+
   get '/data' do
     content_type :json
     get_todays_metrics.to_json
@@ -85,6 +106,14 @@ class Celcius < Sinatra::Base
   # Require that a specific parameter has been specified
   def param(name)
     params[name] or halt 400, "#{name} required!"
+  end
+
+  def get_energies(first, last)
+    metrics = EnergySensor.first.metrics.where(:date.gte => first).and(:date.lt => last)
+    metrics[0..-2].map.with_index{|n,i|
+      next_metric = metrics[i+1]
+      [next_metric.date, (next_metric.pulses - n.pulses)/10000.0]
+    }
   end
 
   def get_todays_metrics
