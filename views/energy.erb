@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Temperaturer</title>
+    <meta charset="UTF-8" />
+    <!--script src="http://zeptojs.com/zepto.min.js"></script-->
+    <script type="text/javascript" src="zepto.min.js"></script>
+    <script type="text/javascript" src="zepto-adapter.src.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <!--<script type="text/javascript" src="highcharts.js"></script>-->
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+          new Highcharts.Chart({
+            chart: {
+              renderTo: 'container',
+              type: 'solidgauge',
+              events: {
+                load: function () {
+                  serie = this.series[0];
+                  setInterval(function getData() {
+                    $.ajax({
+                      url: '/sensor/'+serie.name,
+                      success: function(data) {
+                        if (data.current != null) {
+                          val = parseInt(data.current);
+                          serie.points[0].update(val);
+                        }
+                      }
+                    });
+                    return getData;
+                  }, 10000);
+                }
+              }
+            },
+            title: null,
+            pane: {
+                center: ['50%', '85%'],
+                size: '140%',
+                startAngle: -90,
+                endAngle: 90,
+                background: {
+                    backgroundColor: '#EEE',
+                    innerRadius: '60%',
+                    outerRadius: '100%',
+                    shape: 'arc'
+                }
+            },
+            tooltip: {
+                enabled: false
+            },
+            yAxis: {
+              min: 0,
+              max: 6000,
+              title: {
+                  text: 'Energiförbrukning',
+                  y: -70
+              },
+              stops: [
+                  [0.1, '#55BF3B'], // green
+                  [0.5, '#DDDF0D'], // yellow
+                  [0.9, '#DF5353'] // red
+              ],
+              lineWidth: 0,
+              minorTickInterval: null,
+              tickPixelInterval: 400,
+              tickWidth: 0,
+              labels: {
+                  y: 16
+              }
+            },
+            plotOptions: {
+                solidgauge: {
+                    dataLabels: {
+                        y: 5,
+                        borderWidth: 0,
+                        useHTML: true
+                    }
+                }
+            },
+            credits: {
+              enabled: false
+            },
+            series: [{
+                  name: 'Elmätare',
+                  data: [0],
+                  dataLabels: {
+                      format: '<div style="text-align:center"><span style="font-size:25px;color:black">{y}</span><br/>' +
+                             '<span style="font-size:12px;color:silver">W</span></div>'
+                  },
+                  tooltip: {
+                      valueSuffix: ' W'
+                  }
+              }]
+          });
+        });
+    </script>
+  </head>
+  <body>
+    <div id="container" style="width: 300px; height: 200px; margin: 0 auto"></div>
+  </body>
+</html>
