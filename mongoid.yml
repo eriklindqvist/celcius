@@ -3,8 +3,7 @@ development: &development
     default:
       database: temperatur
       hosts:
-         - proto:27017
-#        - localhost:27017
+        - localhost:27017
 
 migration:
   clients:

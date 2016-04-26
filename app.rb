@@ -6,7 +6,6 @@ require 'mongoid'
 require 'json'
 require 'tilt/erubis'
 
-#Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|f| require f }
 require_relative 'helpers/init'
 
 Mongoid.load!("mongoid.yml")
@@ -109,11 +108,7 @@ class Celcius < Sinatra::Base
   end
 
   def get_energies(first, last)
-    metrics = EnergySensor.first.metrics.where(:date.gte => first).and(:date.lt => last)
-    metrics[0..-2].map.with_index{|n,i|
-      next_metric = metrics[i+1]
-      [next_metric.date, (next_metric.pulses - n.pulses)/10000.0]
-    }
+    WattageMetric.where(sensor_id: EnergySensor.first.id).and(:date.gte => first).and(:date.lt => last).pluck(:date, :pulses).each_cons(2).map {|a| [a[1][0], (a[1][1] - a[0][1])/10000.0] }
   end
 
   def get_todays_metrics
