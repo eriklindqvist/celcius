@@ -38,7 +38,22 @@ class Celcius < Sinatra::Base
     date = params[:date] ? Date.parse(params[:date]) : Date.today
     first = Date.new(date.year, date.month, 1) - 1
     last = Date.new(date.year, date.month+1, 1)
-    get_energies(first, last).to_json
+    energies = get_energies(first, last)
+    sum = energies.map(&:last).inject(&:+)
+    avg = sum.to_f/energies.length
+    forecast = avg * date.end_of_month.day
+    { energies: energies,
+      summary: {sum: sum, avg: avg, forecast: forecast}
+    }.to_json
+  end
+
+  get '/energy/yearly/?:date?' do
+    content_type :json
+    date = params[:date] ? Date.parse(params[:date]) : Date.today
+    first = Date.new(date.year-1, 12, 31)
+    last = Date.new(date.year+1, 1, 1)
+    energies = get_energies(first, last)
+    energies.group_by{|e| e.first.month }.map{|m| [m.first, m.last.map(&:last).inject(&:+)] }.to_h.to_json
   end
 
   get '/data' do
