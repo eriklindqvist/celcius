@@ -40,7 +40,7 @@ class Celcius < Sinatra::Base
     last = Date.new(date.year, date.month+1, 1)
     energies = get_energies(first, last)
     sum = energies.map(&:last).inject(&:+)
-    avg = sum.to_f/energies.length
+    avg = energies[0..-2].map(&:last).inject(&:+).to_f/(energies.length-1)
     forecast = avg * date.end_of_month.day
     { energies: energies,
       summary: {sum: sum, avg: avg, forecast: forecast}
