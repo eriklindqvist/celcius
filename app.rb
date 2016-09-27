@@ -34,7 +34,6 @@ class Celcius < Sinatra::Base
 
   # curl http://localhost:4004/energy/monthly
   get '/energy/monthly/?:date?' do
-    content_type :json
     date = params[:date] ? Date.parse(params[:date]) : Date.today
     first = Date.new(date.year, date.month, 1) - 1
     last = Date.new(date.year, date.month+1, 1)
@@ -42,9 +41,10 @@ class Celcius < Sinatra::Base
     sum = energies.map(&:last).inject(&:+)
     avg = energies[0..-2].map(&:last).inject(&:+).to_f/(energies.length-1)
     forecast = avg * date.end_of_month.day
-    { energies: energies,
+    @data = { energies: energies,
       summary: {sum: sum, avg: avg, forecast: forecast}
     }.to_json
+    erb :monthly
   end
 
   get '/energy/yearly/?:date?' do
