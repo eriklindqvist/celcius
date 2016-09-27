@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Energiförbrukning</title>
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="../zepto.min.js"></script>
+    <script type="text/javascript" src="../zepto-adapter.src.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript">
+      var data = <%= @data %>;
+
+      var d1 = $.map(data["energies"], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
+      var d2 = $.map(data["energies"], function(e){return [[new Date(e[0]).getTime(), e[1]/2]]; });
+
+      var months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"];
+
+    $('#container').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Energiförbrukning',
+        },
+        subtitle: {
+          text: months[new Date(d1[0][0]).getMonth()]
+        },
+        yAxis: {
+            title: {
+                text: 'kWh'
+            },
+            stackLabels: {
+                enabled: true,
+                style: {
+                    fontWeight: 'bold',
+                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                }
+            }
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        legend: {
+            align: 'right',
+            x: -30,
+            verticalAlign: 'top',
+            y: 25,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}<br/>{point.x}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            }
+        },
+        series: [{
+            name: 'Hushållsel',
+            data: d1
+        },{
+            name: 'Elbil',
+            data: d2
+        }]
+    });
+    </script>
+  </head>
+  <body>
+    <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+  </body>
+</html>
