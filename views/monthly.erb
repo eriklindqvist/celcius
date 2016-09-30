@@ -5,17 +5,26 @@
     <meta charset="UTF-8" />
     <script type="text/javascript" src="../zepto.min.js"></script>
     <script type="text/javascript" src="../zepto-adapter.src.js"></script>
-    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript" src="../highcharts.js"></script>
     <script type="text/javascript">
       var data = <%= @data %>;
 
       var d1 = $.map(data["energies"], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
-      var d2 = $.map(data["energies"], function(e){return [[new Date(e[0]).getTime(), e[1]/2]]; });
-
+      //var d2 = $.map(data["energies"], function(e){return [[new Date(e[0]).getTime(), e[1]/2]]; });
+      var d2=[];
       var months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"];
 
-    $('#container').highcharts({
+    $(document).ready(function () {
+      Highcharts.setOptions({
+          global: {
+              //timezoneOffset: -1 * 60,
+              useUTC: false
+          }
+      });
+
+      new Highcharts.Chart({
         chart: {
+          renderTo: 'container',
             type: 'column'
         },
         title: {
@@ -51,7 +60,7 @@
             shadow: false
         },
         tooltip: {
-            headerFormat: '<b>{point.x}</b><br/>',
+            headerFormat: '<b>{Date.parse(point.x)}</b><br/>',
             pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}<br/>{point.x}'
         },
         plotOptions: {
@@ -67,6 +76,7 @@
             data: d2
         }]
     });
+  });
     </script>
   </head>
   <body>
