@@ -4,10 +4,10 @@
     <title>Temperaturer</title>
     <meta charset="UTF-8" />
     <!--script src="http://zeptojs.com/zepto.min.js"></script-->
-    <script type="text/javascript" src="zepto.min.js"></script>
-    <script type="text/javascript" src="zepto-adapter.src.js"></script>
+    <script type="text/javascript" src="<%= url('zepto.min.js') %>"></script>
+    <script type="text/javascript" src="<%= url('zepto-adapter.src.js') %>"></script>
+    <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
     <!--script src="http://code.highcharts.com/highcharts.js"></script-->
-    <script type="text/javascript" src="highcharts.js"></script>
     <script type="text/javascript">
       data = <%= @data %>
 
