@@ -37,9 +37,9 @@ class Celcius < Sinatra::Base
     date = params[:date] ? Date.parse(params[:date]) : Date.today
     first = Date.new(date.year, date.month, 1) - 1
     last = Date.new(date.year, date.month+1, 1)
-    energies = get_energies(first, last)
-    sum = energies.map(&:last).inject(&:+)
-    avg = energies[0..-2].map(&:last).inject(&:+).to_f/(energies.length-1)
+    energies = get_all_energies(first, last)
+    sum = energies["Elm\u00E4tare"].map(&:last).inject(&:+)
+    avg = energies["Elm\u00E4tare"][0..-2].map(&:last).inject(&:+).to_f/(energies.length-1)
     forecast = avg * date.end_of_month.day
     @data = { energies: energies,
       summary: {sum: sum, avg: avg, forecast: forecast}
@@ -123,7 +123,23 @@ class Celcius < Sinatra::Base
   end
 
   def get_energies(first, last)
-    WattageMetric.where(sensor_id: EnergySensor.first.id).and(:date.gte => first).and(:date.lt => last).pluck(:date, :pulses).each_cons(2).map {|a| [a[1][0], (a[1][1] - a[0][1])/10000.0] }
+    WattageMetric.where(sensor_id: EnergySensor.first.id)
+      .and(:date.gte => first)
+      .and(:date.lt => last)
+      .pluck(:date, :pulses)
+      .each_cons(2).map {|a| [a[1][0], (a[1][1] - a[0][1])/10000.0] }
+  end
+
+  def get_all_energies(first,last)
+    names = EnergySensor.pluck(:id, :name).to_h
+
+    metrics = WattageMetric.where(:date.gte => first).and(:date.lt => last)
+      .pluck(:date, :pulses, :sensor)
+      .group_by{|metric| names[metric[2]] }
+      .map{|name,metrics| [name, metrics.each_cons(2).map {|pair| [pair[1][0], (pair[1][1] - pair[0][1])/10000.0] } ]}.to_h
+
+    metrics["Hush\u00E5llsel"] = metrics["Elm\u00E4tare"].map{|m| [m[0], m[1] - (metrics["Elbil"].find{|b| b[0] == m[0] }[1] rescue 0)] }
+    metrics
   end
 
   def get_todays_metrics
