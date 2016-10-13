@@ -157,6 +157,7 @@ class Celcius < Sinatra::Base
                                          .map { |time, value| [time.to_i*1000, value] }}.to_a
                                   .sort_by { |values| values[0]||[] }
                      .map(&:to_a).flatten(1)}}
+        .reject {|metric| metric[:data].empty? }
         .each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
       }.flatten
   end
