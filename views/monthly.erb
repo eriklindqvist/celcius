@@ -9,8 +9,8 @@
     <script type="text/javascript">
       var data = <%= @data %>;
 
-      var d1 = $.map(data["energies"]["Hushållsel"], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
-      var d2 = $.map(data["energies"]["Elbil"], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
+      var d1 = $.map(data["energies"]["Hushållsel"]||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
+      var d2 = $.map(data["energies"]["Elbil"]||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
 
       var months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"];
 
