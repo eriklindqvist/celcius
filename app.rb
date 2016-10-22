@@ -75,7 +75,7 @@ class Celcius < Sinatra::Base
     Value.create(sensor, time, value)
   end
 
-# curl -X POST -d "sensor=1&value=12345" http://localhost:4004/pulses
+  # curl -X POST -d "sensor=1&value=12345&time=12345" http://localhost:4004/pulses
   post '/pulses' do
     begin
       sensor = EnergySensor.find_by uid: param(:sensor)
@@ -84,7 +84,7 @@ class Celcius < Sinatra::Base
       halt 400, e.message
     end
 
-    time = Time.now
+    time = Time.at((params[:time] || Time.now).to_i)
     logger.info "energy sensor: #{sensor}, pulses: #{pulses}, time: #{time}"
     WattageValue.create(sensor, time, pulses)
   end

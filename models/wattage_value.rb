@@ -5,7 +5,7 @@ class WattageValue < Value
     t = time.dup
     until !!(metric.values[t.hour.to_s]||{})[t.min.to_s] || (t.hour == 0 && t.min == 0); t -= 60; end
 
-    # TODO: Ensure first run works. This i sprobably not good enough. 
+    # TODO: Ensure first run works. This is probably not good enough. 
     new_pulses = pulses - metric.pulses rescue 0
     seconds = time - metric.updated_at rescue 0
 
