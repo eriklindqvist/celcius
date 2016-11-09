@@ -15,8 +15,12 @@ class Celcius < Sinatra::Base
   enable :logging
 
   # curl http://localhost:4004/
-  get '/' do
-    @data = get_todays_metrics.to_json
+  get '/:datefrom?/?:dateto?' do
+    from = params[:datefrom] ? Date.parse(params[:datefrom]) : 1.day.ago
+    to = params[:dateto] ? Date.parse(params[:dateto]) : from + 2.day
+    puts from
+    puts to
+    @data = get_metrics(from, to).to_json
     erb :index
   end
 
@@ -116,7 +120,8 @@ class Celcius < Sinatra::Base
   end
 
 
-  #private
+  private
+
   # Require that a specific parameter has been specified
   def param(name)
     params[name] or halt 400, "#{name} required!"
@@ -143,7 +148,11 @@ class Celcius < Sinatra::Base
   end
 
   def get_todays_metrics
-    Metric.where(:date.gte => 1.days.ago)
+    get_metrics(1.day.ago, 1.day.from_now)
+  end
+
+  def get_metrics(first, last)
+    metrics = Metric.where(:date.gte => first).and(:date.lt => last)
       .order_by(_type: :asc)
       .group_by(&:_type)
       .each_with_index.map {|(type, metrics), i|
@@ -153,12 +162,22 @@ class Celcius < Sinatra::Base
           name: sensor,
           type: 'spline',
           yAxis: i,
-          data: vals.map { |v| v[:values].select {|time| time > (Time.now - 1.day) }
+          data: vals.map { |v| v[:values].select {|time| time > first }
                                          .map { |time, value| [time.to_i*1000, value] }}.to_a
                                   .sort_by { |values| values[0]||[] }
                      .map(&:to_a).flatten(1)}}
         .reject {|metric| metric[:data].empty? }
-        .each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
+        #.each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
       }.flatten
+  end
+
+  def get_number_of_fires_last_year
+    Sensor.where(name: 'Pannan').only(:id).first.metrics # Pann-sensorns metrics
+      .where(:date.gte => 1.year.ago) # för det senaste året
+      .select {|metric| # Välj enbart ut de vars
+        metric.values.map {|hour,minutes| # timmar vars
+          minutes.map {|minute,values| values}}.flatten # minuter, vars värden
+          .each_cons(2).any?{|p| p[0] <= 50 && p[1] >= 50 }} # har passerat 50 grader på väg upp
+      .count # räkna ut antalet
   end
 end
