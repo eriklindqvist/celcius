@@ -171,9 +171,9 @@ class Celcius < Sinatra::Base
       }.flatten
   end
 
-  def get_number_of_fires_last_year
+  def get_number_of_fires(from, to)
     Sensor.where(name: 'Pannan').only(:id).first.metrics # Pann-sensorns metrics
-      .where(:date.gte => 1.year.ago) # för det senaste året
+      .where(:date.gte => first).and(:date.lt => last)
       .select {|metric| # Välj enbart ut de vars
         metric.values.map {|hour,minutes| # timmar vars
           minutes.map {|minute,values| values}}.flatten # minuter, vars värden
