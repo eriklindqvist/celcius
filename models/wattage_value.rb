@@ -10,7 +10,7 @@ class WattageValue < Value
     new_pulses = pulses - metric.pulses rescue 0
     seconds = time - metric.updated_at rescue 0
 
-    watts = new_pulses*((0.036*sensor.rate)/seconds) unless seconds == 0
+    watts = new_pulses*(360.0*(10000/sensor.rate)/seconds) unless seconds == 0
 
     current_value = (metric.values[t.hour.to_s]||{})[t.min.to_s]
 
