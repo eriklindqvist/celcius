@@ -5,6 +5,7 @@ gem 'mongoid'
 gem 'json'
 gem 'erubis'
 gem 'bigdecimal'
+gem 'nokogiri'
 
 group :migration do
   gem 'activerecord'
