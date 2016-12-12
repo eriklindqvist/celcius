@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Prognos</title>
+    <meta charset="UTF-8" />
+    <!--script src="http://zeptojs.com/zepto.min.js"></script-->
+    <script type="text/javascript" src="<%= url('zepto.min.js') %>"></script>
+    <script type="text/javascript" src="<%= url('zepto-adapter.src.js') %>"></script>
+    <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
+    <!--script src="http://code.highcharts.com/highcharts.js"></script-->
+    <script type="text/javascript">
+      data = <%= @data %>
+
+      $(document).ready(function () {
+          Highcharts.setOptions({
+              global: {
+                  //timezoneOffset: -1 * 60,
+                  useUTC: false
+              }
+          });
+
+          new Highcharts.Chart({
+            chart: {
+              renderTo: 'container',
+              type: 'spline',
+              zoomType: 'xy',
+            },
+            title: {
+                text: 'Prognos 24 h'
+            },
+            subtitle: {
+                text: 'Rosenholm, Brittatorp'
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150,
+                title: {
+                    text: 'Klockslag'
+                }
+            },
+            yAxis: [{
+                title: {
+                    text: 'Temperatur'
+                },
+                labels: {
+                  format: '{value} °C',
+                }
+              }],
+            tooltip: {
+                headerFormat: '<b>{series.name}</b>: ',
+                pointFormat: '{point.y:.2f}'
+            },
+            plotOptions: {
+              series: {
+                animation: false,
+                marker: {
+                  enabled: false
+                }
+              }
+            },
+            legend: {
+              layout: 'horizontal',
+              align: 'center',
+              verticalAlign: 'bottom',
+              borderWidth: 1,
+              labelFormatter: function () { return this.name; }
+            },
+            series: data
+          })
+        });
+    </script>
+  </head>
+  <body>
+    <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+  </body>
+</html>
