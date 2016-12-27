@@ -127,6 +127,20 @@ class Celcius < Sinatra::Base
     WattageValue.create(sensor, time, pulses)
   end
 
+  # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature
+  post '/value' do
+    begin
+      sensor = EnergySensor.find_by uid: param(:sensor)
+      value = Float(param(:value))
+    rescue => e
+      halt 400, e.message
+    end
+
+    time = Time.at((params[:time] || Time.now).to_i)
+    logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
+    WattageValue.create_value(sensor, time, value)
+  end
+
   # curl http://localhost:4004/sensors
   get '/sensors' do
     content_type :json
