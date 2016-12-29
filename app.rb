@@ -193,7 +193,7 @@ class Celcius < Sinatra::Base
   def get_all_energies(first,last)
     names = EnergySensor.pluck(:id, :name).to_h
 
-    metrics = WattageMetric.where(:date.gte => first).and(:date.lt => last)
+    metrics = WattageMetric.where(:date.gte => first).and(:date.lt => last).and(:pulses.gt => 0)
       .pluck(:date, :pulses, :sensor)
       .group_by{|metric| names[metric[2]] }
       .map{|name,metrics| [name, metrics.each_cons(2).map {|pair| [pair[1][0], (pair[1][1] - pair[0][1])/10000.0] } ]}.to_h
