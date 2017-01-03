@@ -14,9 +14,7 @@ class WattageValue < Value
 
     current_value = (metric.values[t.hour.to_s]||{})[t.min.to_s]
 
-    if watts && (current_value.nil? || (watts - current_value).abs > 0.1)
-      metric.set_value(time, watts)
-    end
+    metric.set_value(time, watts) if watts    
 
     metric.pulses = pulses
     metric.save
