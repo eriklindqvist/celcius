@@ -198,7 +198,7 @@ class Celcius < Sinatra::Base
       .group_by{|metric| names[metric[2]] }
       .map{|name,metrics| [name, metrics.each_cons(2).map {|pair| [pair[1][0], (pair[1][1] - pair[0][1])/10000.0] } ]}.to_h
 
-    metrics["Hush\u00E5llsel"] = metrics["Elm\u00E4tare"].map{|m| [m[0], m[1] - (metrics["Elbil"].find{|b| b[0] == m[0] }[1] rescue 0)] }
+    metrics["Hush\u00E5llsel"] = metrics["Elm\u00E4tare"].map{|m| [m[0], m[1] - (metrics["Varmvattenberedare"].find{|b| b[0] == m[0] }[1] rescue 0)] }
     metrics
   end
 
