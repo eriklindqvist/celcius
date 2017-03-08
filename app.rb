@@ -172,7 +172,12 @@ class Celcius < Sinatra::Base
     from = params[:datefrom] ? Date.parse(params[:datefrom]) : 1.day.ago
     to = params[:dateto] ? Date.parse(params[:dateto]) : from + 2.day
     @data = get_metrics(from, to).to_json
-    erb :index
+    if request.accept.map(&:entry).include?("application/json")
+      content_type :json
+      @data
+    else
+      erb :index
+    end
   end
 
   private
