@@ -12,8 +12,6 @@ class WattageValue < Value
 
     watts = new_pulses*(360.0*(10000/sensor.rate)/seconds) unless seconds == 0
 
-    current_value = (metric.values[t.hour.to_s]||{})[t.min.to_s]
-
     metric.set_value(time, watts) if watts
 
     metric.pulses = pulses
@@ -27,7 +25,7 @@ class WattageValue < Value
     t = time.dup
     until !!(metric.values[t.hour.to_s]||{})[t.min.to_s] || (t.hour == 0 && t.min == 0); t -= 60; end
 
-    existing_value = (metric.values[t.hour.to_s]||{})[t.min.to_s]
+    existing_value = (metric.values[time.hour.to_s]||{})[time.min.to_s]
     values = metric.values.map{|h,vals| vals.map{|m,values| [DateTime.new(time.year, time.month, time.day, h.to_i, m.to_i, 0, time.zone), values] }}.flatten(1).to_h
 
     unless existing_value
@@ -39,22 +37,15 @@ class WattageValue < Value
       if last_time < time
         rate = sensor.rate || 10000
 
-        hours = hours(last_time, time)
+        hours = [last_time, time].map(&:to_time).reduce(&:-).abs / 3600
         kwh = (last_value * hours + ((last_value - value).abs * hours)/2)/1000
 
         pulses = kwh * rate
 
-        metric.pulses += pulses
+        metric.pulses = (metric.pulses || 0) + pulses
       end
 
       metric.save
     end
-  end
-
-  private
-  # Level 2 notation just for fun.
-  # Return difference in hours between two DateTime objects
-  def hours(*times)
-    times[0..1].map(&:to_time).reduce(&:-).abs / 3600
   end
 end
