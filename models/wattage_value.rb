@@ -34,7 +34,9 @@ class WattageValue < Value
       last_time, last_value = values.to_a.last
 
       # Only allow update of fake pulses value if inserting at the end of the values array
-      if last_time < time
+      if !last_time
+        metric.pulses = 0
+      elsif last_time < time
         rate = sensor.rate || 10000
 
         hours = [last_time, time].map(&:to_time).reduce(&:-).abs / 3600
