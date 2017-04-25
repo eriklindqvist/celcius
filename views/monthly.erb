@@ -9,8 +9,7 @@
     <script type="text/javascript">
       var data = <%= @data %>;
 
-      var d1 = $.map(data["energies"]["Hushållsel"]||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
-      var d2 = $.map(data["energies"]["Varmvattenberedare"]||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]; });
+      var series = $.map(data, function(values, name) { return {name: name, data: $.map(values||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]})}});
 
       var months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"];
 
@@ -30,9 +29,9 @@
         title: {
             text: 'Energiförbrukning',
         },
-        subtitle: {
+        /*subtitle: {
           text: months[new Date(d1[0][0]).getMonth()]
-        },
+        },*/
         yAxis: {
             title: {
                 text: 'kWh'
@@ -68,13 +67,7 @@
                 stacking: 'normal',
             }
         },
-        series: [{
-            name: 'Varmvattenberedare',
-            data: d2
-        },{
-            name: 'Hushållsel',
-            data: d1
-        }]
+        series: series
     });
   });
     </script>

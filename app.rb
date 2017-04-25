@@ -77,16 +77,15 @@ class Celcius < Sinatra::Base
   # curl http://localhost:4004/energy/monthly
   get '/energy/monthly/?:date?' do
     date = params[:date] ? Date.parse(params[:date]) : Date.today
-    first = Date.new(date.year, date.month, 1) - 1
-    date2 = date + 1.month
-    last = Date.new(date2.year, date2.month, 1)
-    energies = get_all_energies(first, last)
-    sum = energies["Elm\u00E4tare"].map(&:last).inject(&:+)
-    avg = energies["Elm\u00E4tare"][0..-2].map(&:last).inject(&:+).to_f/(energies.length-1)
-    forecast = avg * date.end_of_month.day
-    @data = { energies: energies,
-      summary: {sum: sum, avg: avg, forecast: forecast}
-    }.to_json
+    first = date.at_beginning_of_month - 1
+    last = date.at_end_of_month + 1
+    data = get_all_energies(first, last)
+
+    @data = {"\u00D6vrigt": data.delete("Elm\u00E4tare")
+              .map{|date,value| [date, value -
+                data.map{|name,metric| metric.select{|m| m[0] == date}}.flatten(1).map{|m| m[1] }.sum]
+              }
+            }.merge(data).to_a.reverse.to_h.to_json
     erb :monthly
   end
 
@@ -127,7 +126,7 @@ class Celcius < Sinatra::Base
     WattageValue.create(sensor, time, pulses)
   end
 
-  # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature
+  # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/value
   post '/value' do
     begin
       sensor = EnergySensor.find_by uid: param(:sensor)
@@ -196,15 +195,10 @@ class Celcius < Sinatra::Base
   end
 
   def get_all_energies(first,last)
-    names = EnergySensor.pluck(:id, :name).to_h
-
-    metrics = WattageMetric.where(:date.gte => first).and(:date.lt => last).and(:pulses.gt => 0)
-      .pluck(:date, :pulses, :sensor)
-      .group_by{|metric| names[metric[2]] }
-      .map{|name,metrics| [name, metrics.each_cons(2).map {|pair| [pair[1][0], (pair[1][1] - pair[0][1])/10000.0] } ]}.to_h
-
-    metrics["Hush\u00E5llsel"] = metrics["Elm\u00E4tare"].map{|m| [m[0], m[1] - (metrics["Varmvattenberedare"].find{|b| b[0] == m[0] }[1] rescue 0)] }
-    metrics
+    WattageMetric.where(:date.gte => first).and(:date.lt => last).and(:pulses.gt => 0)
+      .only(:date, :pulses, :sensor)
+      .group_by{|metric| metric.sensor.name }
+      .map{|name,metrics| [name, metrics.each_cons(2).map {|a,b| [b.date, (b.pulses - a.pulses).to_f/(a.sensor.rate||10000)] } ]}.to_h
   end
 
   def get_todays_metrics
