@@ -35,7 +35,7 @@ class WattageValue < Value
 
       # Only allow update of fake pulses value if inserting at the end of the values array
       if !last_time
-        metric.pulses = WattageMetric.where(sensor: sensor_id, date: metric.date-1).pluck(:pulses).first || 0
+        metric.pulses = WattageMetric.where(sensor: sensor_id, :date.lt => metric.date, :pulses.gt => 0).pluck(:pulses).first || 0
       elsif last_time < time
         rate = sensor.rate || 10000
 
