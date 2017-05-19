@@ -2,7 +2,7 @@ user="admin"
 pass="*****"
 
 # Radiatorpump, Laddomat, Frysen, Diskmaskinen
-watt_sensors=("ZWayVDev_zway_14-2-50-2" "ZWayVDev_zway_14-1-50-2" "ZWayVDev_zway_9-0-50-2" "ZWayVDev_zway_10-0-50-2")
+watt_sensors=("ZWayVDev_zway_14-2-50-2" "ZWayVDev_zway_14-1-50-2" "ZWayVDev_zway_9-0-50-2" "ZWayVDev_zway_10-0-50-2" "ZWayVDev_zway_37-1-50-2" "ZWayVDev_zway_29-1-50-2")
 temp_sensors=("ZWayVDev_zway_6-0-49-1")
 
 api="http://find.z-wave.me/ZAutomation/api/v1"
