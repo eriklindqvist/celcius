@@ -34,7 +34,7 @@
                       $.ajax({
                         url: '/sensor/'+serie.name,
                         success: function(data) {
-                          if (data.current != null) {
+                          if (data.current !== null) {
                             val = parseFloat(data.current).toFixed(2);
                           } else {
                             val = serie.yData[serie.yData.length - 1];
@@ -65,8 +65,18 @@
                     text: 'Temperatur'
                 },
                 labels: {
-                  format: '{value} °C',
+                  format: '{value} °C'
                 }
+              },{
+                title: {
+                    text: 'Energiförbrukning'
+                },
+                labels: {
+                    format: '{value} W'
+                },
+                min: 0,
+                max: 5000,
+                opposite: true
               }],
             tooltip: {
                 headerFormat: '<b>{series.name}</b>: ',

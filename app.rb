@@ -236,13 +236,13 @@ class Celcius < Sinatra::Base
         .map(&:values_arr).inject(:merge) # Slå samman deras värden till en lång lista
         .each_cons(3).select {|a,b,c| b[1] > a[1] && b[1] > c[1] }.map{|a,b,c| b}.to_h # Hitta alla lokala maximum
         .sort_by(&:last).reverse.to_h # Sortera i värdeordning
-        .inject([]){|r,e| r.empty? || r.last.first < e.first ? r << e : r }.to_h # Plocka i datumordning
+        .inject([]){|r,e| r.empty? || r.last.first < e.first ? r << e : r }.to_h rescue nil # Plocka i datumordning
   end
 
   def get_heat_spline(from, to)
     data = get_available_heat(from, to)
             .select {|date,values| date > from } # Ta bara med värden som är upp till 24 h gamla
-            .map{|date,value| [date.to_i*1000, value] }[0..-2] # Hoppa över sista värdet, det är sällan pålitligt
+            .map{|date,value| [date.to_i*1000, value] }[0..-2] rescue [] # Hoppa över sista värdet, det är sällan pålitligt
     if data.size > 1
       { name: 'Toppen av tanken',
         type: 'spline',
