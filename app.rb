@@ -129,8 +129,8 @@ class Celcius < Sinatra::Base
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/value
   post '/value' do
     begin
+      value = get_wattage(:value)
       sensor = EnergySensor.find_by uid: param(:sensor)
-      value = Float(param(:value))
     rescue => e
       halt 400, e.message
     end
@@ -302,5 +302,11 @@ class Celcius < Sinatra::Base
   # Tar resultatet från get_fires() och summerar
   def sum_fires(fires)
     fires.map{|m,c| c}.inject(&:+)
+  end
+
+  def get_wattage(parameter)
+    value = Float(param(parameter))
+    raise "Unreasonable value!" if value > 3700 # unreasonable high value (> 16 A * 230 V )
+    value
   end
 end
