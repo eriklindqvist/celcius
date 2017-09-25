@@ -190,12 +190,14 @@ class Celcius < Sinatra::Base
     WattageMetric.where(sensor_id: EnergySensor.first.id)
       .and(:date.gte => first)
       .and(:date.lt => last)
+      .order_by(date: :asc)
       .pluck(:date, :pulses)
       .each_cons(2).map {|a| [a[1][0], (a[1][1] - a[0][1])/10000.0] }
   end
 
   def get_all_energies(first,last)
     WattageMetric.where(:date.gte => first).and(:date.lt => last).and(:pulses.gt => 0)
+      .order_by(date: :asc)
       .only(:date, :pulses, :sensor)
       .group_by{|metric| metric.sensor.name }
       .map{|name,metrics| [name, metrics.each_cons(2).map {|a,b| [b.date, (b.pulses - a.pulses).to_f/(a.sensor.rate||10000)] } ]}.to_h
