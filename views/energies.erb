@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Energiförbrukning</title>
+    <meta charset="UTF-8" />
+    <!--script src="http://zeptojs.com/zepto.min.js"></script-->
+    <script type="text/javascript" src="<%= url('zepto.min.js') %>"></script>
+    <script type="text/javascript" src="<%= url('zepto-adapter.src.js') %>"></script>
+    <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
+    <!--script src="http://code.highcharts.com/highcharts.js"></script-->
+    <script type="text/javascript">
+      data = <%= @data %>
+
+      $(document).ready(function () {
+          Highcharts.setOptions({
+              global: {
+                  //timezoneOffset: -1 * 60,
+                  useUTC: false
+              }
+          });
+
+          new Highcharts.Chart({
+            chart: {
+              renderTo: 'container',
+              type: 'areaspline',
+              zoomType: 'xy',
+              events: {
+                load: function () {
+                  $.each(this.series, function(i, serie) {
+                    setInterval(function () {
+                      now = (new Date()).getTime();
+                      $.ajax({
+                        url: '/sensor/'+serie.name,
+                        success: function(data) {
+                          if (data.current != null) {
+                            val = parseFloat(data.current).toFixed(2);
+                          } else {
+                            val = serie.yData[serie.yData.length - 1];
+                          }
+                          serie.addPoint([now, val], false, false);
+                        }
+                      })
+                    }, 30000);
+                  });
+                }
+              }
+            },
+            title: {
+                text: 'Energiförbrukning'
+            },
+            subtitle: {
+                text: 'Rosenholm, Brittatorp'
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150,
+                title: {
+                    text: 'Klockslag'
+                }
+            },
+            yAxis: [{
+                title: {
+                    text: 'Energiförbrukning'
+                },
+                labels: {
+                  format: '{value} W',
+                }
+            }],
+            tooltip: {
+                headerFormat: '<b>{series.name}</b>: ',
+                pointFormat: '{point.y:.2f}'
+            },
+            plotOptions: {
+             /*areaspline: {
+                stacking: 'normal'
+              },*/
+              series: {
+                animation: false,
+                marker: {
+                  enabled: false
+                }
+              }
+            },
+            legend: {
+              layout: 'horizontal',
+              align: 'center',
+              verticalAlign: 'bottom',
+              borderWidth: 1,
+              labelFormatter: function () { return this.name + ': ' + this.yData[this.yData.length - 1].toFixed(2); }
+            },
+            series: data
+          })
+        });
+    </script>
+  </head>
+  <body>
+    <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+  </body>
+</html>

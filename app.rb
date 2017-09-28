@@ -79,7 +79,7 @@ class Celcius < Sinatra::Base
     date = params[:date] ? Date.parse(params[:date]) : Date.today
     first = date.at_beginning_of_month - 1
     last = date.at_end_of_month + 1
-    data = get_all_energies(first, last)
+    data = get_all_grouped_energies(first, last)
 
     @data = {"\u00D6vrigt": data.delete("Elm\u00E4tare")
               .map{|date,value| [date, value -
@@ -170,12 +170,21 @@ class Celcius < Sinatra::Base
   get '/:datefrom?/?:dateto?' do
     from = params[:datefrom] ? Date.parse(params[:datefrom]) : 1.day.ago
     to = params[:dateto] ? Date.parse(params[:dateto]) : from + 2.day
-    @data = get_metrics(from, to).to_json
+
+    if params[:type]=="energies"
+      type = "WattageMetric"
+      view = :energies
+    else
+      type = "Metric"
+      view = :index
+    end
+
+    @data = get_metrics(from, to, type).to_json
     if request.accept.map(&:entry).include?("application/json")
       content_type :json
       @data
     else
-      erb :index
+      erb view
     end
   end
 
@@ -203,12 +212,23 @@ class Celcius < Sinatra::Base
       .map{|name,metrics| [name, metrics.each_cons(2).map {|a,b| [b.date, (b.pulses - a.pulses).to_f/(a.sensor.rate||10000)] } ]}.to_h
   end
 
+  def get_all_grouped_energies(first,last)
+    WattageMetric.where(:date.gte => first).and(:date.lt => last).and(:pulses.gt => 0)
+      .order_by(date: :asc)
+      .only(:date, :pulses, :sensor)
+      .group_by{|metric| metric.sensor }
+      .map{|sensor,metrics| metrics.each_cons(2).map {|a,b| [sensor.group||sensor.name, b.date, (b.pulses - a.pulses).to_f/(a.sensor.rate||10000)] }}
+      .flatten(1)
+      .group_by(&:first)
+      .map{|name,vals| [name, vals.group_by(&:second).map{|date,val| [date, val.inject(0) {|sum,v| sum += v[2]; }]}]}.to_h
+  end
+
   def get_todays_metrics
     get_metrics(1.day.ago, 1.day.from_now)
   end
 
-  def get_metrics(first, last)
-    metrics = Metric.where(:date.gte => first).and(:date.lt => last)
+  def get_metrics(first, last, type="Metric")
+    metrics = Metric.where(:date.gte => first).and(:date.lt => last).and(:_type => type)
       .order_by(_type: :asc)
       .group_by(&:_type)
       .each_with_index.map {|(type, metrics), i|
@@ -225,7 +245,7 @@ class Celcius < Sinatra::Base
         .reject {|metric| metric[:data].empty? }
         #.each {|metric| metric[:data].last[0] = Time.now.to_i*1000 }
       }.flatten
-      heat = get_heat_spline(first,last)
+      heat = get_heat_spline(first,last) if type == "Metric"
       if heat
         metrics << heat
       else
