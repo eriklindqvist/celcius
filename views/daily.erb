@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Energiförbrukning</title>
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="<%= url('zepto.min.js') %>"></script>
+    <script type="text/javascript" src="<%= url('zepto-adapter.src.js') %>"></script>
+    <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
+    <script type="text/javascript">
+      var data = <%= @data %>;
+
+    $(document).ready(function () {
+      Highcharts.setOptions({
+          global: {
+              //timezoneOffset: -1 * 60,
+              useUTC: false
+          }
+      });
+
+      new Highcharts.Chart({
+        chart: {
+          renderTo: 'container',
+            type: 'pie'
+        },
+        title: {
+            text: 'Energiförbrukning',
+        },
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+      },
+      plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                style: {
+                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                }
+            }
+        }
+    },
+    series: [{
+        name: 'Energi',
+        colorByPoint: true,
+        data: data
+      }]
+    });
+  });
+    </script>
+  </head>
+  <body>
+    <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+  </body>
+</html>

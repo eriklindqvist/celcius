@@ -69,9 +69,14 @@ class Celcius < Sinatra::Base
 
   # curl http://localhost:4004/energy/daily/2016-03-31
   get '/energy/daily/?:date?' do
-    content_type :json
     date = params[:date] ? Date.parse(params[:date]) : Date.today
-    get_energies(date-1, date+1).first.to_json
+    data = get_all_grouped_energies(date-1, date+1)
+    @data = {"\u00D6vrigt": data.delete("Elm\u00E4tare")
+              .map{|date,value| [date, value -
+                data.map{|name,metric| metric.select{|m| m[0] == date}}.flatten(1).map{|m| m[1] }.sum]
+              }
+            }.merge(data).to_a.reverse.to_h.map{|name,metric| {name: name, y: metric.last.last}}.to_json
+    erb :daily
   end
 
   # curl http://localhost:4004/energy/monthly
