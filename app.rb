@@ -81,9 +81,9 @@ class Celcius < Sinatra::Base
 
   # curl http://localhost:4004/energy/monthly
   get '/energy/monthly/?:date?' do
-    date = params[:date] ? Date.parse(params[:date]) : Date.today
-    first = date.at_beginning_of_month - 1
-    last = date.at_end_of_month + 1
+    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    first = @date.at_beginning_of_month - 1
+    last = @date.at_end_of_month + 1
     data = get_all_grouped_energies(first, last)
 
     @data = {"\u00D6vrigt": data.delete("Elm\u00E4tare")

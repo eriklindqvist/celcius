@@ -8,6 +8,7 @@
     <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
     <script type="text/javascript">
       var data = <%= @data %>;
+      var date = '<%= @date %>';
 
       var series = $.map(data, function(values, name) { return {name: name, data: $.map(values||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]})}});
 
@@ -29,9 +30,9 @@
         title: {
             text: 'Energiförbrukning',
         },
-        /*subtitle: {
-          text: months[new Date(d1[0][0]).getMonth()]
-        },*/
+        subtitle: {
+          text: months[new Date(date).getMonth()] + " " + new Date(date).getFullYear()
+        },
         yAxis: {
             title: {
                 text: 'kWh'
@@ -48,15 +49,16 @@
             type: 'datetime'
         },
         legend: {
-            align: 'right',
-            x: -30,
-            verticalAlign: 'top',
-            y: 25,
-            floating: true,
+            align: 'center',
+            //x: -30,
+            verticalAlign: 'bottom',
+            //y: 25,
+            floating: false,
             backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
             borderColor: '#CCC',
             borderWidth: 1,
-            shadow: false
+            shadow: false,
+            margin: 32
         },
         tooltip: {
             headerFormat: '',
