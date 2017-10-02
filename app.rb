@@ -69,8 +69,8 @@ class Celcius < Sinatra::Base
 
   # curl http://localhost:4004/energy/daily/2016-03-31
   get '/energy/daily/?:date?' do
-    date = params[:date] ? Date.parse(params[:date]) : Date.today
-    data = get_all_grouped_energies(date-1, date+1)
+    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    data = get_all_grouped_energies(@date-1, @date+1).select{|k,v| v.first.last > 0.05 }
     @data = {"\u00D6vrigt": data.delete("Elm\u00E4tare")
               .map{|date,value| [date, value -
                 data.map{|name,metric| metric.select{|m| m[0] == date}}.flatten(1).map{|m| m[1] }.sum]

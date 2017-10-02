@@ -8,6 +8,7 @@
     <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
     <script type="text/javascript">
       var data = <%= @data %>;
+      var date = '<%= @date %>';
 
     $(document).ready(function () {
       Highcharts.setOptions({
@@ -24,6 +25,9 @@
         },
         title: {
             text: 'Energiförbrukning',
+        },
+        subtitle: {
+            text: date
         },
         tooltip: {
           pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
