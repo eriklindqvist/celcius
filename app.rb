@@ -95,12 +95,13 @@ class Celcius < Sinatra::Base
   end
 
   get '/energy/yearly/?:date?' do
-    content_type :json
-    date = params[:date] ? Date.parse(params[:date]) : Date.today
-    first = Date.new(date.year-1, 12, 31)
-    last = Date.new(date.year+1, 1, 1)
+    #content_type :json
+    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    first = Date.new(@date.year-1, 12, 31)
+    last = Date.new(@date.year+1, 1, 1)
     energies = get_energies(first, last)
-    energies.group_by{|e| e.first.month }.map{|m| [m.first, m.last.map(&:last).inject(&:+)] }.to_h.to_json
+    @data = energies.group_by{|e| e.first.month }.map{|m| [m.first, m.last.map(&:last).inject(&:+)] }.to_h.to_json
+    erb :yearly
   end
 
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature

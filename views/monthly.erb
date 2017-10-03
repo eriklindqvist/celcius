@@ -8,9 +8,16 @@
     <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
     <script type="text/javascript">
       var data = <%= @data %>;
-      var date = '<%= @date %>';
+      var date = new Date('<%= @date %>');
+      var month_length = new Date(date.getFullYear(), date.getMonth()+1, 0).getDate();
 
-      var series = $.map(data, function(values, name) { return {name: name, data: $.map(values||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]})}});
+      var series = $.map(data, function(values, name) {
+        for (var i = values.length; i < month_length ; i++) {
+          values.push([new Date(date.getFullYear(), date.getMonth(), i+1).toLocaleDateString(), null])
+        }
+
+        return {name: name, data: $.map(values||[], function(e){return [[new Date(e[0]).getTime(), e[1]]]})}
+      });
 
       var months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"];
 
@@ -31,7 +38,7 @@
             text: 'Energiförbrukning',
         },
         subtitle: {
-          text: months[new Date(date).getMonth()] + " " + new Date(date).getFullYear()
+          text: months[date.getMonth()] + " " + date.getFullYear()
         },
         yAxis: {
             title: {
@@ -75,8 +82,8 @@
               point: {
                 events: {
                   click: function () {
-                    date = new Date(this.category);
-                    location.pathname='/energy/daily/'+date.toLocaleDateString();
+                    d = new Date(this.category);
+                    location.pathname='/energy/daily/'+d.toLocaleDateString();
                   }
                 }
               }
