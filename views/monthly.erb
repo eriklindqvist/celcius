@@ -43,16 +43,18 @@
                     fontWeight: 'bold',
                     color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
                 }
-            }
+            },
+            min: 0
         },
         xAxis: {
-            type: 'datetime'
+            type: 'datetime',
+            dateTimeLabelFormats: {
+              day: '%d'
+            }
         },
         legend: {
             align: 'center',
-            //x: -30,
             verticalAlign: 'bottom',
-            //y: 25,
             floating: false,
             backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
             borderColor: '#CCC',
@@ -67,6 +69,17 @@
         plotOptions: {
             column: {
                 stacking: 'normal',
+            },
+            series: {
+              cursor: 'pointer',
+              point: {
+                events: {
+                  click: function () {
+                    date = new Date(this.category);
+                    location.pathname='/energy/daily/'+date.toLocaleDateString();
+                  }
+                }
+              }
             }
         },
         series: series
