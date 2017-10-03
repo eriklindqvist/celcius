@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Energiförbrukning</title>
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="<%= url('zepto.min.js') %>"></script>
+    <script type="text/javascript" src="<%= url('zepto-adapter.src.js') %>"></script>
+    <script type="text/javascript" src="<%= url('highcharts.js') %>"></script>
+    <script type="text/javascript">
+      var data = <%= @data %>;
+      var date = new Date('<%= @date %>');
+
+      var series = $.map(data, function(values, name) { return values });
+
+      while(series.length < 12)
+        series.push(0);
+
+      var months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"];
+
+    $(document).ready(function () {
+      Highcharts.setOptions({
+          global: {
+              //timezoneOffset: -1 * 60,
+              useUTC: false
+          }
+      });
+
+      new Highcharts.Chart({
+        chart: {
+          renderTo: 'container',
+            type: 'column'
+        },
+        title: {
+            text: 'Energiförbrukning',
+        },
+        subtitle: {
+          text: date.getFullYear()
+        },
+        yAxis: {
+            title: {
+                text: 'kWh'
+            },
+            stackLabels: {
+                enabled: true,
+                style: {
+                    fontWeight: 'bold',
+                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                }
+            },
+            min: 0
+        },
+        xAxis: {
+            categories: months
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            floating: false,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false,
+            margin: 32
+        },
+        tooltip: {
+            headerFormat: '',
+            pointFormat: '{series.name}: {point.y}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            },
+            series: {
+              cursor: 'pointer',
+              point: {
+                events: {
+                  click: function () {
+                    location.pathname='/energy/monthly/'+new Date(date.getFullYear(), this.x, 1).toLocaleDateString();
+                  }
+                }
+              }
+            }
+        },
+        series: [{
+          data: series,
+          name: date.getFullYear()
+        }]
+    });
+  });
+    </script>
+  </head>
+  <body>
+    <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+  </body>
+</html>
