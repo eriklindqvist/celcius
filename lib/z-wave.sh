@@ -27,7 +27,7 @@ for temp_sensor in "${temp_sensors[@]}"
 do
   json=`curl -s "$api/devices/$temp_sensor" -b cookie.txt`
   update=`echo $json | awk 'match($0, /\"updateTime\":([0-9]+)/, a) {print a[1]}'`
-  value=`echo $json | awk 'match($1, /\"level\":([0-9]+(\.[0-9]{1,2})?)/, a) {print a[1]}'`
+  value=`echo $json | awk 'match($1, /\"level\":(-*[0-9]+(\.[0-9]{1,2})?)/, a) {print a[1]}'`
 #  echo "temp: $value"
 #  echo "curl -X POST -d 'sensor=$temp_sensor&value=$value&time=$update' '$url/temperature'"
   curl -X POST -d "sensor=$temp_sensor&value=$value&time=$update" "$url/temperature"
