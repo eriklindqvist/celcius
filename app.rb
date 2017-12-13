@@ -115,7 +115,11 @@ class Celcius < Sinatra::Base
 
     time = Time.at((params[:time] || Time.now).to_i)
     logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
-    Value.create(sensor, time, value)
+    begin
+      Value.create(sensor, time, value)
+    rescue => e
+      halt 400, e.message
+    end
   end
 
   # curl -X POST -d "sensor=1&value=12345&time=12345" http://localhost:4004/pulses
@@ -123,13 +127,15 @@ class Celcius < Sinatra::Base
     begin
       sensor = EnergySensor.find_by uid: param(:sensor)
       pulses = Integer(param(:value))
+
+      time = Time.at((params[:time] || Time.now).to_i)
+      logger.info "energy sensor: #{sensor}, pulses: #{pulses}, time: #{time}"
+
+      WattageValue.create(sensor, time, pulses)
     rescue => e
+      logger.warn e.message
       halt 400, e.message
     end
-
-    time = Time.at((params[:time] || Time.now).to_i)
-    logger.info "energy sensor: #{sensor}, pulses: #{pulses}, time: #{time}"
-    WattageValue.create(sensor, time, pulses)
   end
 
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/value
@@ -137,13 +143,15 @@ class Celcius < Sinatra::Base
     begin
       value = get_wattage(:value)
       sensor = EnergySensor.find_by uid: param(:sensor)
+
+      time = Time.at((params[:time] || Time.now).to_i)
+      logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
+
+      WattageValue.create_value(sensor, time, value)
     rescue => e
+      logger.warn e.message
       halt 400, e.message
     end
-
-    time = Time.at((params[:time] || Time.now).to_i)
-    logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
-    WattageValue.create_value(sensor, time, value)
   end
 
   # curl http://localhost:4004/sensors
@@ -170,6 +178,14 @@ class Celcius < Sinatra::Base
     rescue => e
       halt 500, e.message
     end
+  end
+
+  get '/metrics/:datefrom?/?:dateto?' do
+    content_type :json
+    from = params[:datefrom] ? Date.parse(params[:datefrom]) : 1.day.ago
+    to = params[:dateto] ? Date.parse(params[:dateto]) : from + 2.day
+    type = params.fetch :type, "Metric"
+    metrics = get_metrics2(from, to, type)
   end
 
   # curl http://localhost:4004/
@@ -227,6 +243,11 @@ class Celcius < Sinatra::Base
       .flatten(1)
       .group_by(&:first)
       .map{|name,vals| [name, vals.group_by(&:second).map{|date,val| [date, val.inject(0) {|sum,v| sum += v[2]; }]}]}.to_h
+  end
+
+  def get_metrics2(first, last, type="Metric")
+    metrics = Metric.where(:date.gte => first).and(:date.lt => last).and(:_type => type)
+      .map{|metric| {metric.sensor.name => metric.values.map{|hour,mins| [hour, mins.values.inject(&:+)/mins.length] }.to_h}}
   end
 
   def get_todays_metrics
