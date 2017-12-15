@@ -26,12 +26,21 @@ class WattageValue < Value
     until !!(metric.values[t.hour.to_s]||{})[t.min.to_s] || (t.hour == 0 && t.min == 0); t -= 60; end
 
     existing_value = (metric.values[time.hour.to_s]||{})[time.min.to_s]
-    values = metric.values.map{|h,vals| vals.map{|m,values| [DateTime.new(time.year, time.month, time.day, h.to_i, m.to_i, 0, time.zone), values] }}.flatten(1).to_h
 
     unless existing_value
-      metric.set_value(time, value) if value
+      values = metric.values.map{|h,vals| vals.map{|m,values| [DateTime.new(time.year, time.month, time.day, h.to_i, m.to_i, 0, time.zone), values] }}.flatten(1).to_h
 
       last_time, last_value = values.to_a.last
+
+      minute_ago = time - 1.minute
+
+      previous_value = values[minute_ago]
+
+      if !previous_value && last_value && last_time < minute_ago
+        metric.set_value(minute_ago, last_value)
+      end
+
+      metric.set_value(time, value) if value
 
       # Only allow update of fake pulses value if inserting at the end of the values array
       if !last_time
@@ -39,10 +48,20 @@ class WattageValue < Value
       elsif last_time < time
         rate = sensor.rate || 10000
 
-        hours = [last_time, time].map(&:to_time).reduce(&:-).abs / 3600
-        kwh = (last_value * hours + ((last_value - value).abs * hours)/2)/1000
+        if !previous_value
+          hours1 = [last_time, minute_ago].map(&:to_time).reduce(&:-).abs / 3600
+          kwh1 = (last_value * hours1)/1000
 
-        pulses = kwh * rate
+          hours2 = [minute_ago, time].map(&:to_time).reduce(&:-).abs / 3600
+          kwh2 = (last_value * hours2 + ((last_value - value).abs * hours2)/2)/1000
+
+          pulses = (kwh1 * rate) + (kwh2 * rate)
+        else
+          hours = [last_time, time].map(&:to_time).reduce(&:-).abs / 3600
+          kwh = (last_value * hours + ((last_value - value).abs * hours)/2)/1000
+
+          pulses = kwh * rate
+        end
 
         metric.pulses = (metric.pulses || 0) + pulses
       end

@@ -11,7 +11,6 @@ class Metric
   end
 
   def set_value(time, value)
-    puts "sensor.range() == #{sensor.range()}"
     raise "Value out of bounds" if !sensor.range().include? value # value within range
 
     (values[time.hour.to_s]||={})[time.min.to_s] = value

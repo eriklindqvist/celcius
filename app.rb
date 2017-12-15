@@ -180,14 +180,6 @@ class Celcius < Sinatra::Base
     end
   end
 
-  get '/metrics/:datefrom?/?:dateto?' do
-    content_type :json
-    from = params[:datefrom] ? Date.parse(params[:datefrom]) : 1.day.ago
-    to = params[:dateto] ? Date.parse(params[:dateto]) : from + 2.day
-    type = params.fetch :type, "Metric"
-    metrics = get_metrics2(from, to, type)
-  end
-
   # curl http://localhost:4004/
   get '/:datefrom?/?:dateto?' do
     from = params[:datefrom] ? Date.parse(params[:datefrom]) : 1.day.ago
@@ -243,11 +235,6 @@ class Celcius < Sinatra::Base
       .flatten(1)
       .group_by(&:first)
       .map{|name,vals| [name, vals.group_by(&:second).map{|date,val| [date, val.inject(0) {|sum,v| sum += v[2]; }]}]}.to_h
-  end
-
-  def get_metrics2(first, last, type="Metric")
-    metrics = Metric.where(:date.gte => first).and(:date.lt => last).and(:_type => type)
-      .map{|metric| {metric.sensor.name => metric.values.map{|hour,mins| [hour, mins.values.inject(&:+)/mins.length] }.to_h}}
   end
 
   def get_todays_metrics
