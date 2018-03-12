@@ -16,7 +16,7 @@ Mongo::Logger.logger.level = Logger::INFO
 class Celcius < Sinatra::Base
   enable :logging
 
-  set :curve, 3  # Sätt till kurvlutningen inställd på reglercentralen
+  set :curve, 2  # Sätt till kurvlutningen inställd på reglercentralen
   set :offset, 0 # Sätt till kurvförskjutningen inställd på reglercentralen
   set :prognose_url, "http://www.yr.no/sted/Sverige/Kronoberg/Brittatorp/varsel_time_for_time.xml"
 
