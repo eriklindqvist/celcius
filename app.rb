@@ -104,6 +104,23 @@ class Celcius < Sinatra::Base
     erb :yearly
   end
 
+  get '/temperature/:sensor/:value' do
+    begin
+      sensor = Sensor.find_by uid: param(:sensor)
+      value = Float(param(:value))
+    rescue => e
+      halt 400, e.message
+    end
+
+    time = Time.now
+    logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
+    begin
+      Value.create(sensor, time, value)
+    rescue => e
+      halt 400, e.message
+    end
+  end
+
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/temperature
   post '/temperature' do
     begin
