@@ -19,6 +19,6 @@ group :development do
 end
 
 group :production do
-  gem 'raindrops', '< 0.14'
+  gem 'raindrops'
   gem 'unicorn'
 end
