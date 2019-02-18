@@ -248,7 +248,7 @@ class Celcius < Sinatra::Base
       .order_by(date: :asc)
       .only(:date, :pulses, :sensor)
       .group_by{|metric| metric.sensor }
-      .map{|sensor,metrics| metrics.each_cons(2).map {|a,b| [sensor.group||sensor.name, b.date, (b.pulses - a.pulses).to_f/(a.sensor.rate||10000)] }}
+      .map{|sensor,metrics| metrics.each_cons(2).map {|a,b| [sensor.group||sensor.name, b.date, [0, (b.pulses - a.pulses)].max.to_f/(a.sensor.rate||10000)] }}
       .flatten(1)
       .group_by(&:first)
       .map{|name,vals| [name, vals.group_by(&:second).map{|date,val| [date, val.inject(0) {|sum,v| sum += v[2]; }]}]}.to_h
