@@ -155,6 +155,22 @@ class Celcius < Sinatra::Base
     end
   end
 
+  # curl http://localhost:4004/value/1/123
+  get '/value/:sensor/:value' do
+    begin
+      value = get_wattage(:value)
+      sensor = EnergySensor.find_by uid: param(:sensor)
+
+      time = Time.now
+      logger.info "sensor: #{sensor}, value: #{value}, time: #{time}"
+
+      WattageValue.create_value(sensor, time, value)
+    rescue => e
+      logger.warn e.message
+      halt 400, e.message
+    end
+  end
+
   # curl -X POST -d "sensor=1&value=123.235&time=12345" http://localhost:4004/value
   post '/value' do
     begin
@@ -362,4 +378,22 @@ class Celcius < Sinatra::Base
     raise "Unreasonable value!" if value > 3700 # unreasonable high value (> 16 A * 230 V )
     value
   end
+
+  def avg(arr)
+    arr.inject(:+).to_f / arr.size
+  end
+
+  def getTemperaturesByYear(year, sensor)
+    average = proc {|m| avg(m.values.map{|i| i[1].values }.flatten) }
+    range = proc {|avg| i=(avg.to_d/5).floor; "#{i*5} - #{(i+1)*5}" }
+    toSize = proc {|h| [h.first, h.last.size] }
+
+    metrics = Metric.where(:date.gte => Date.new(year,1,1)).and(:date.lt => Date.new(year,12,31)).and(sensor: sensor)
+
+    metrics
+      .map(&average)
+      .group_by(&range)
+      .map(&toSize)
+      .to_h
+    end
 end
